@@ -46,11 +46,18 @@ class Indexer {
       };
     } catch (error) {
       const durationMs = Date.now() - startTime;
+      let errorMessage = error.message;
+
+      // Specially handling 403 errors for users
+      if (error.code === 403 || (error.response && error.response.status === 403)) {
+        errorMessage = `Permission Denied: Please add "${this.jwtClient.email}" as an OWNER in Google Search Console for this domain.`;
+      }
+
       return {
         success: false,
         url: url,
         type: type,
-        error: error.message,
+        error: errorMessage,
         durationMs: durationMs,
       };
     }

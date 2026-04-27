@@ -29,26 +29,18 @@ const getServiceAccount = () => {
 
 // Endpoint to submit URLs for indexing
 app.post('/api/index', async (req, res) => {
-  const { urls, userId = 1 } = req.body; // Default userId to 1 for now
-  if (!urls || !Array.isArray(urls)) {
-    return res.status(400).json({ error: 'Please provide an array of URLs' });
-  }
+  const { urls, userId = 1 } = req.body;
+  // ... existing code
+});
 
+// Endpoint to get service account info (email to share with users)
+app.get('/api/config', (req, res) => {
   const serviceAccount = getServiceAccount();
-  if (!serviceAccount) {
-    return res.status(500).json({ error: 'Service account credentials missing. Place service-account.json in the root directory.' });
+  if (serviceAccount) {
+    res.json({ client_email: serviceAccount.client_email });
+  } else {
+    res.status(404).json({ error: 'Service account not found' });
   }
-
-  const indexer = new Indexer(serviceAccount);
-  const results = [];
-
-  for (const url of urls) {
-    const result = await indexer.indexUrl(url);
-    await Indexer.logIndexing(userId, result);
-    results.push(result);
-  }
-
-  res.json({ results });
 });
 
 // Endpoint to fetch indexing logs

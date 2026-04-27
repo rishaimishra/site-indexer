@@ -5,6 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalIndexed = document.getElementById('totalIndexed');
     const avgDuration = document.getElementById('avgDuration');
     const statusMessage = document.getElementById('statusMessage');
+    const saEmail = document.getElementById('saEmail');
+
+    // Fetch service account email for instructions
+    const fetchConfig = async () => {
+        try {
+            const response = await fetch('/api/config');
+            const data = await response.json();
+            if (data.client_email) {
+                saEmail.textContent = data.client_email;
+            } else {
+                saEmail.textContent = 'Email not found';
+            }
+        } catch (error) {
+            console.error('Error fetching config:', error);
+            saEmail.textContent = 'Error loading email';
+        }
+    };
 
     const fetchLogs = async () => {
         try {
@@ -84,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial fetch
+    fetchConfig();
     fetchLogs();
     fetchStats();
 
