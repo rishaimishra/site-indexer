@@ -29,8 +29,38 @@ const getServiceAccount = () => {
 
 // Endpoint to submit URLs for indexing
 app.post('/api/index', async (req, res) => {
+  console.log(`[Server] Received indexing request for ${req.body.urls ? req.body.urls.length : 0} URLs`);
   const { urls, userId = 1 } = req.body;
-  // ... existing code
+
+  if (!urls || !Array.isArray(urls)) {
+    return res.status(400).json({ error: 'Please provide an array of URLs' });
+  }
+
+  const serviceAccount = getServiceAccount();
+  if (!serviceAccount) {
+    console.error(`[Server] Error: service-account.json not found!`);
+    return res.status(500).json({ error: 'Service account credentials missing. Place service-account.json in the root directory.' });
+  }
+
+  const indexer = new Indexer(serviceAccount);
+  const results = [];
+
+  try {
+    for (const url of urls) {
+      console.log(`[Server] Processing: ${url}`);
+      const result = await indexer.indexUrl(url);
+
+      console.log(`[Server] Logging to DB: ${url}`);
+      await Indexer.logIndexing(userId, result);
+
+      results.push(result);
+    }
+    console.log(`[Server] Finished all URLs. Sending response.`);
+    res.json({ results });
+  } catch (err) {
+    console.error(`[Server] Fatal Error:`, err.message);
+    res.status(500).json({ error: 'An unexpected error occurred on the server.' });
+  }
 });
 
 // Endpoint to get service account info (email to share with users)

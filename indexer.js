@@ -24,10 +24,14 @@ class Indexer {
   }
 
   async indexUrl(url, type = 'URL_UPDATED') {
+    console.log(`[Indexer] Starting indexing for: ${url}`);
     const startTime = Date.now();
     try {
-      await this.authorize();
+      console.log(`[Indexer] Authorizing...`);
+      await this.jwtClient.authorize();
+      console.log(`[Indexer] Authorization successful`);
 
+      console.log(`[Indexer] Publishing to Google API...`);
       const response = await google.indexing('v3').urlNotifications.publish({
         auth: this.jwtClient,
         requestBody: {
@@ -35,6 +39,7 @@ class Indexer {
           type: type,
         },
       });
+      console.log(`[Indexer] Google API Success`);
 
       const durationMs = Date.now() - startTime;
       return {
@@ -45,10 +50,10 @@ class Indexer {
         durationMs: durationMs,
       };
     } catch (error) {
+      console.error(`[Indexer] Error during indexing:`, error.message);
       const durationMs = Date.now() - startTime;
       let errorMessage = error.message;
 
-      // Specially handling 403 errors for users
       if (error.code === 403 || (error.response && error.response.status === 403)) {
         errorMessage = `Permission Denied: Please add "${this.jwtClient.email}" as an OWNER in Google Search Console for this domain.`;
       }
@@ -64,11 +69,14 @@ class Indexer {
   }
 
   static async logIndexing(userId, result) {
+    console.log(`[DB] Attempting to log result for: ${result.url}`);
     const client = new Client({
       connectionString: process.env.DATABASE_URL,
+      connectionTimeoutMillis: 5000, // 5 seconds timeout
     });
     try {
       await client.connect();
+      console.log(`[DB] Connected`);
       const status = result.success ? 'SUCCESS' : 'FAILED';
       const apiResponse = result.success ? JSON.stringify(result.response) : JSON.stringify({ error: result.error });
 
@@ -77,10 +85,12 @@ class Indexer {
          VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5, $6)`,
         [userId, result.url, status, result.type, result.durationMs, apiResponse]
       );
+      console.log(`[DB] Log inserted successfully`);
     } catch (err) {
-      console.error('Error logging to database:', err);
+      console.error('[DB] Error logging to database:', err.message);
     } finally {
       await client.end();
+      console.log(`[DB] Connection closed`);
     }
   }
 }
