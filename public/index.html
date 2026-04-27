@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid Indexer - Google URL Indexing Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Rapid Indexer</h1>
+            <p>Index your URLs on Google in seconds</p>
+        </header>
+
+        <main>
+            <section class="indexing-form">
+                <h2>Submit URLs</h2>
+                <p class="hint">Enter one URL per line (Max 20)</p>
+                <textarea id="urlsInput" placeholder="https://example.com/page1
+https://example.com/page2"></textarea>
+                <button id="submitBtn">Submit for Indexing</button>
+                <div id="statusMessage"></div>
+            </section>
+
+            <section class="stats-row">
+                <div class="stat-card">
+                    <h3 id="totalIndexed">0</h3>
+                    <p>Past Hour Success</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="avgDuration">0s</h3>
+                    <p>Avg Indexing Time</p>
+                </div>
+            </section>
+
+            <section class="activity-logs">
+                <h2>Recent Indexing Activities</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>URL</th>
+                                <th>User</th>
+                                <th>Time Taken</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsBody">
+                            <!-- Logs will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
